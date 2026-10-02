@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Quỹ Be.E Solo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #faf9f7;
+            --card: #ffffff;
+            --border: #e8e5e0;
+            --text: #1a1a1a;
+            --muted: #8c8680;
+            --green: #2d8a4e;
+            --green-bg: #edf7f0;
+            --green-light: #d4edda;
+            --red: #c0392b;
+            --red-bg: #fdf0ee;
+            --red-light: #f5d5d0;
+            --accent: #e67e22;
+            --accent-bg: #fef5ec;
+            box-sizing: border-box;
+            padding-top: env(safe-area-inset-top, 0px);
+            padding-bottom: env(safe-area-inset-bottom, 0px);
+        }
+        html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+        @media (prefers-color-scheme: dark) {
+            :root:not([data-theme="light"]) {
+                --bg: #111110;
+                --card: #1c1c1a;
+                --border: #2e2e2a;
+                --text: #e8e5e0;
+                --muted: #8c8680;
+                --green-bg: #1a2e20;
+                --green-light: #1a3324;
+                --red-bg: #2e1a18;
+                --red-light: #331d1a;
+                --accent-bg: #2e2418;
+            }
+        }
+        :root[data-theme="dark"] {
+            --bg: #111110;
+            --card: #1c1c1a;
+            --border: #2e2e2a;
+            --text: #e8e5e0;
+            --muted: #8c8680;
+            --green-bg: #1a2e20;
+            --green-light: #1a3324;
+            --red-bg: #2e1a18;
+            --red-light: #331d1a;
+            --accent-bg: #2e2418;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            line-height: 1.5;
+        }
+        .container { max-width: 1100px; margin: 0 auto; padding: 24px 16px 80px; }
+
+        /* Header */
+        .header {
+            text-align: center;
+            padding: 32px 0 24px;
+        }
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 900;
+            letter-spacing: -0.02em;
+        }
+        .header h1 span { color: var(--accent); }
+
+        /* Summary cards */
+        .summary {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 28px;
+        }
+        .summary-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+        }
+        .summary-card .label {
+            font-size: 0.65rem;
+            font-weight: 700;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 4px;
+        }
+        .summary-card .value {
+            font-size: 1.1rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+        }
+        .summary-card.thu .value { color: var(--green); }
+        .summary-card.chi .value { color: var(--red); }
+        .summary-card.total { background: var(--accent-bg); border-color: var(--accent); }
+        .summary-card.total .value { color: var(--accent); font-size: 1.3rem; }
+
+        /* Columns layout */
+        .columns {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+        @media (max-width: 800px) {
+            .columns { grid-template-columns: 1fr; }
+        }
+
+        .table-scroll {
+            max-height: 640px;
+            overflow-y: auto;
+        }
+        .table-scroll thead { position: sticky; top: 0; z-index: 1; }
+        .table-scroll thead th { background: var(--card); }
+
+        /* Section */
+        .section {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+        }
+        .section-title {
+            font-size: 0.8rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .section-title .dot {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        .section.thu .dot { background: var(--green); }
+        .section.chi .dot { background: var(--red); }
+
+        .btn-add {
+            font-size: 0.7rem;
+            font-weight: 700;
+            border: none;
+            border-radius: 8px;
+            padding: 6px 14px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .section.thu .btn-add { background: var(--green-bg); color: var(--green); }
+        .section.thu .btn-add:hover { background: var(--green-light); }
+        .section.chi .btn-add { background: var(--red-bg); color: var(--red); }
+        .section.chi .btn-add:hover { background: var(--red-light); }
+
+        /* Table */
+        table { width: 100%; border-collapse: collapse; }
+        th {
+            font-size: 0.6rem;
+            font-weight: 700;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            text-align: left;
+            padding: 10px 20px;
+            background: var(--bg);
+        }
+        th:last-child { text-align: right; }
+        td {
+            padding: 12px 20px;
+            font-size: 0.82rem;
+            border-top: 1px solid var(--border);
+            vertical-align: middle;
+        }
+        td:first-child {
+            font-size: 0.75rem;
+            color: var(--muted);
+            font-weight: 500;
+            white-space: nowrap;
+            width: 100px;
+        }
+        td:last-child {
+            text-align: right;
+            font-weight: 700;
+            font-variant-numeric: tabular-nums;
+            white-space: nowrap;
+        }
+        .section.thu td:last-child { color: var(--green); }
+        .section.chi td:last-child { color: var(--red); }
+        tr:hover td { background: var(--bg); }
+        .btn-del {
+            border: none;
+            background: none;
+            color: var(--muted);
+            cursor: pointer;
+            font-size: 0.75rem;
+            opacity: 0;
+            transition: opacity 0.15s;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+        tr:hover .btn-del { opacity: 1; }
+        .btn-del:hover { color: var(--red); background: var(--red-bg); }
+
+        .empty-msg {
+            text-align: center;
+            padding: 28px 20px;
+            color: var(--muted);
+            font-size: 0.78rem;
+            font-style: italic;
+        }
+
+        /* Add form */
+        .add-form {
+            display: none;
+            padding: 16px 20px;
+            background: var(--bg);
+            border-top: 1px solid var(--border);
+            gap: 10px;
+        }
+        .add-form.show { display: flex; flex-wrap: wrap; }
+        .add-form input {
+            font-family: inherit;
+            font-size: 0.8rem;
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--card);
+            color: var(--text);
+            outline: none;
+        }
+        .add-form input:focus { border-color: var(--accent); }
+        .add-form input[type="date"] { width: 140px; }
+        .add-form input[type="text"] { flex: 1; min-width: 120px; }
+        .add-form input[type="number"] { width: 130px; }
+        .add-form button {
+            font-family: inherit;
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            color: white;
+        }
+        .section.thu .add-form button { background: var(--green); }
+        .section.chi .add-form button { background: var(--red); }
+
+        /* Backup section */
+        .backup-section {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            padding: 20px 0;
+        }
+        .btn-backup {
+            font-family: inherit;
+            font-size: 0.7rem;
+            font-weight: 600;
+            padding: 8px 18px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--card);
+            color: var(--muted);
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .btn-backup:hover { border-color: var(--accent); color: var(--accent); }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(80px);
+            background: var(--text);
+            color: var(--bg);
+            padding: 10px 24px;
+            border-radius: 10px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 999;
+            pointer-events: none;
+        }
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+        @media (max-width: 600px) {
+            .summary { grid-template-columns: 1fr; gap: 8px; }
+            .summary-card { padding: 12px; }
+            td { padding: 10px 14px; font-size: 0.78rem; }
+            th { padding: 8px 14px; }
+            .add-form input[type="date"] { width: 100%; }
+            .add-form input[type="number"] { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>Quỹ <span>Be.E Solo</span> 🐝</h1>
+    </div>
+
+    <div class="summary">
+        <div class="summary-card thu">
+            <div class="label">Tổng thu</div>
+            <div class="value" id="sumThu">0</div>
+        </div>
+        <div class="summary-card chi">
+            <div class="label">Tổng chi</div>
+            <div class="value" id="sumChi">0</div>
+        </div>
+        <div class="summary-card total">
+            <div class="label">Số dư hiện tại</div>
+            <div class="value" id="sumTotal">0</div>
+        </div>
+    </div>
+
+    <div class="columns">
+        <!-- THU -->
+        <div class="section thu">
+            <div class="section-header">
+                <div class="section-title"><span class="dot"></span> Khoản thu</div>
+                <button class="btn-add" onclick="toggleForm('thu')">+ Thêm</button>
+            </div>
+            <div class="table-scroll">
+                <table><thead><tr><th>Ngày</th><th>Nội dung</th><th>Số tiền</th><th></th></tr></thead><tbody id="tblThu"></tbody></table>
+            </div>
+            <div class="add-form" id="formThu">
+                <input type="date" id="dateThu">
+                <input type="text" id="noteThu" placeholder="Nội dung">
+                <input type="number" id="amtThu" placeholder="Số tiền">
+                <button onclick="addItem('thu')">Lưu</button>
+            </div>
+        </div>
+
+        <!-- CHI -->
+        <div class="section chi">
+            <div class="section-header">
+                <div class="section-title"><span class="dot"></span> Khoản chi</div>
+                <button class="btn-add" onclick="toggleForm('chi')">+ Thêm</button>
+            </div>
+            <div class="table-scroll">
+                <table><thead><tr><th>Ngày</th><th>Nội dung</th><th>Số tiền</th><th></th></tr></thead><tbody id="tblChi"></tbody></table>
+            </div>
+            <div class="add-form" id="formChi">
+                <input type="date" id="dateChi">
+                <input type="text" id="noteChi" placeholder="Nội dung">
+                <input type="number" id="amtChi" placeholder="Số tiền">
+                <button onclick="addItem('chi')">Lưu</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="backup-section">
+        <button class="btn-backup" onclick="exportData()">⬇ Sao lưu</button>
+        <button class="btn-backup" onclick="document.getElementById('importFile').click()">⬆ Khôi phục</button>
+        <input type="file" id="importFile" accept=".json" onchange="importData(event)" hidden>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const STORAGE_KEY = 'bee_solo_v1';
+
+const defaultData = {
+    thu: [
+        { id: 't2', date: '2026-10-01', note: 'Tiền thưởng tháng 8', amount: 4000000 },
+        { id: 't1', date: '2026-10-01', note: 'Tiền thưởng Quý 2', amount: 8000000 },
+        { id: 't0', date: '2026-10-01', note: 'Tiền thưởng Quý 1', amount: 5000000 },
+    ],
+    chi: [
+        { id: 'c19', date: '2026-10-01', note: 'Phúc Long', amount: 137000 },
+        { id: 'c18', date: '2026-10-01', note: 'Starbucks', amount: 225000 },
+        { id: 'c17', date: '2026-10-01', note: 'Ship Grab thư mời sự kiện', amount: 209000 },
+        { id: 'c16', date: '2026-10-01', note: 'Claude Max', amount: 2000000 },
+        { id: 'c15', date: '2026-10-01', note: 'Hành lí đi Hải Phòng', amount: 540000 },
+        { id: 'c14', date: '2026-10-01', note: 'Kỉ niệm 7 năm', amount: 2000000 },
+        { id: 'c13', date: '2026-10-01', note: 'Claude Max', amount: 2000000 },
+        { id: 'c12', date: '2026-10-01', note: 'Trái cây', amount: 237000 },
+        { id: 'c11', date: '2026-10-01', note: 'Phúc Long', amount: 242000 },
+        { id: 'c10', date: '2026-10-01', note: 'Nước dừa', amount: 79000 },
+        { id: 'c9', date: '2026-10-01', note: 'Nước ép', amount: 100000 },
+        { id: 'c8', date: '2026-10-01', note: 'Phê La', amount: 150000 },
+        { id: 'c7', date: '2026-10-01', note: 'Nước dừa', amount: 76000 },
+        { id: 'c6', date: '2026-10-01', note: 'Cho My', amount: 200000 },
+        { id: 'c5', date: '2026-10-01', note: 'Ăn tối', amount: 400000 },
+        { id: 'c4', date: '2026-10-01', note: 'Picsart', amount: 360000 },
+        { id: 'c3', date: '2026-10-01', note: 'Starbucks', amount: 176000 },
+        { id: 'c2', date: '2026-10-01', note: 'Nước dừa', amount: 50000 },
+        { id: 'c1', date: '2026-10-01', note: 'Ăn beefsteak', amount: 500000 },
+    ]
+};
+
+let data = JSON.parse(localStorage.getItem(STORAGE_KEY)) || JSON.parse(JSON.stringify(defaultData));
+
+function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
+
+function fmt(n) { return n.toLocaleString('vi-VN') + 'đ'; }
+
+function fmtDate(d) {
+    if (!d) return '';
+    const parts = d.split('-');
+    return parts[2] + '/' + parts[1] + '/' + parts[0];
+}
+
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+
+function render() {
+    const tblThu = document.getElementById('tblThu');
+    const tblChi = document.getElementById('tblChi');
+
+    // Sort by date desc
+    data.thu.sort((a, b) => b.date.localeCompare(a.date));
+    data.chi.sort((a, b) => b.date.localeCompare(a.date));
+
+    tblThu.innerHTML = data.thu.length
+        ? data.thu.map(r => `<tr><td>${fmtDate(r.date)}</td><td>${r.note}</td><td>+${fmt(r.amount)}</td><td><button class="btn-del" onclick="delItem('thu','${r.id}')">✕</button></td></tr>`).join('')
+        : '<tr><td colspan="4" class="empty-msg">Chưa có khoản thu nào</td></tr>';
+
+    tblChi.innerHTML = data.chi.length
+        ? data.chi.map(r => `<tr><td>${fmtDate(r.date)}</td><td>${r.note}</td><td>-${fmt(r.amount)}</td><td><button class="btn-del" onclick="delItem('chi','${r.id}')">✕</button></td></tr>`).join('')
+        : '<tr><td colspan="4" class="empty-msg">Chưa có khoản chi nào</td></tr>';
+
+    const totalThu = data.thu.reduce((s, r) => s + r.amount, 0);
+    const totalChi = data.chi.reduce((s, r) => s + r.amount, 0);
+    const balance = totalThu - totalChi;
+
+    document.getElementById('sumThu').textContent = '+' + fmt(totalThu);
+    document.getElementById('sumChi').textContent = '-' + fmt(totalChi);
+    document.getElementById('sumTotal').textContent = fmt(balance);
+}
+
+function toggleForm(type) {
+    const form = document.getElementById('form' + type.charAt(0).toUpperCase() + type.slice(1));
+    form.classList.toggle('show');
+    if (form.classList.contains('show')) {
+        const dateInput = document.getElementById('date' + type.charAt(0).toUpperCase() + type.slice(1));
+        if (!dateInput.value) dateInput.value = new Date().toISOString().split('T')[0];
+    }
+}
+
+function addItem(type) {
+    const T = type.charAt(0).toUpperCase() + type.slice(1);
+    const date = document.getElementById('date' + T).value;
+    const note = document.getElementById('note' + T).value.trim();
+    const amount = parseInt(document.getElementById('amt' + T).value);
+    if (!note || !amount || amount <= 0) return toast('Vui lòng nhập đầy đủ!');
+
+    data[type].unshift({ id: uid(), date, note, amount });
+    save();
+    render();
+
+    document.getElementById('note' + T).value = '';
+    document.getElementById('amt' + T).value = '';
+    toast(type === 'thu' ? 'Đã thêm khoản thu' : 'Đã thêm khoản chi');
+}
+
+function delItem(type, id) {
+    if (!confirm('Xóa khoản này?')) return;
+    data[type] = data[type].filter(r => r.id !== id);
+    save();
+    render();
+    toast('Đã xóa');
+}
+
+function exportData() {
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'bee_solo_backup_' + new Date().toISOString().slice(0, 10) + '.json';
+    a.click();
+    toast('Đã tải file sao lưu');
+}
+
+function importData(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+        try {
+            const d = JSON.parse(ev.target.result);
+            if (!d.thu || !d.chi) throw new Error('invalid');
+            if (!confirm(`Khôi phục ${d.thu.length} khoản thu và ${d.chi.length} khoản chi?\nDữ liệu hiện tại sẽ bị thay thế.`)) return;
+            data = d;
+            save();
+            render();
+            toast('Khôi phục thành công!');
+        } catch (err) {
+            toast('File không hợp lệ!');
+        }
+        e.target.value = '';
+    };
+    reader.readAsText(file);
+}
+
+function toast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+render();
+</script>
+</body>
+</html>
